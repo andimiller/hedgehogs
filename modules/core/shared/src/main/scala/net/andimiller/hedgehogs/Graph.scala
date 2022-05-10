@@ -46,6 +46,3 @@ object Graph {
   }
 
 }
-object T extends App {
-  println("hello world")
-}
