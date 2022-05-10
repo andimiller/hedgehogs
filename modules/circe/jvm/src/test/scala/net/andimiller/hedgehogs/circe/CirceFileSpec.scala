@@ -46,6 +46,35 @@ class CirceFileSpec extends WordIOSpec {
         _       <- IO { assertEquals(distance, 34.some) }
       } yield ()
     }
+    "load the whole EVE database and plan many routes at once" in {
+      for {
+        systems <- loadJsonByLine[Node[Long, String]]("./examples/systems.json")
+        gates   <- loadJsonByLine[Edge[Long, Int]]("./examples/gates.json")
+        graph    = Graph.fromIterables(systems, gates, false).toOption.get
+        karan    = systems.find(_.data == "Karan").map(_.id).get
+        jita     = systems.find(_.data == "Jita").map(_.id).get
+        amarr    = systems.find(_.data == "Amarr").map(_.id).get
+        distance = Dijkstra
+                     .multi(graph)(karan, Set(jita, amarr))
+                     .view
+                     .mapValues(_._1)
+                     .toMap
+        _       <- IO { assertEquals(distance, Map(jita -> 34, amarr -> 29)) }
+      } yield ()
+    }
+    "load the whole EVE database and plan the entire map" in {
+      for {
+        systems   <- loadJsonByLine[Node[Long, String]]("./examples/systems.json")
+        gates     <- loadJsonByLine[Edge[Long, Int]]("./examples/gates.json")
+        graph      = Graph.fromIterables(systems, gates, false).toOption.get
+        karan      = systems.find(_.data == "Karan").map(_.id).get
+        allSystems = systems.map(_.id)
+        distance   = Dijkstra
+                       .multi(graph)(karan, allSystems.toSet)
+                       .size
+        _         <- IO { assertEquals(distance, 5174) }
+      } yield ()
+    }
   }
 
 }

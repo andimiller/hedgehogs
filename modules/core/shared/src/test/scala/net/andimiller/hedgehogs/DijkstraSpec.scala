@@ -35,4 +35,28 @@ class DijkstraSpec extends munit.FunSuite {
       (Some((10, List("abc", "def"))), Some((10, List("def", "abc")))).validNel
     )
   }
+  test("multi-route in a directional graph") {
+    assertEquals(
+      Graph
+        .fromIterables(
+          Vector(Node("abc", "cool"), Node("def", "also cool")),
+          Vector(Edge("abc", "def", 10)),
+          bidirectional = false
+        )
+        .map { g =>
+          val r1 = Dijkstra.multi(g)("abc", Set("abc", "def"))
+          val r2 = Dijkstra.multi(g)("def", Set("abc", "def"))
+          (r1, r2)
+        },
+      (
+        Map(
+          "abc" -> (0, List("abc")),
+          "def" -> (10, List("abc", "def"))
+        ),
+        Map(
+          "def" -> (0, List("def"))
+        )
+      ).validNel
+    )
+  }
 }
