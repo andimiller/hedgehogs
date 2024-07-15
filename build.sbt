@@ -2,7 +2,7 @@ import xerial.sbt.Sonatype._
 import sbtwelcome._
 
 val runtimes       = List(JVMPlatform, JSPlatform, NativePlatform)
-val scalaVersions  = List("2.13.6", "3.4.2")
+val scalaVersions  = List("2.13.14", "3.3.3")
 val y              = scala.Console.YELLOW
 val c              = scala.Console.CYAN
 val commonSettings = List(
