@@ -1,8 +1,8 @@
 import xerial.sbt.Sonatype._
 import sbtwelcome._
 
-val runtimes       = List(JVMPlatform, JSPlatform)
-val scalaVersions  = List("2.13.6", "3.1.1")
+val runtimes       = List(JVMPlatform, JSPlatform, NativePlatform)
+val scalaVersions  = List("2.13.6", "3.4.2")
 val y              = scala.Console.YELLOW
 val c              = scala.Console.CYAN
 val commonSettings = List(
@@ -28,8 +28,8 @@ val commonSettings = List(
   organization               := "net.andimiller",
   crossPaths                 := true,
   testFrameworks += new TestFramework("munit.Framework"),
-  version                    := "0.2.0",
-  scalaVersion               := "3.1.1",
+  version                    := "0.3.0",
+  scalaVersion               := "3.4.2",
   ThisBuild / scalafmtConfig := file(".scalafmt.conf"),
   useGpg                     := true,
   publishTo                  := sonatypePublishTo.value,
@@ -46,14 +46,14 @@ val commonSettings = List(
     )
   ),
   libraryDependencies ++= List(
-    "net.andimiller" %%% "munit-cats-effect-3-styles" % "1.0.2"  % Test,
-    "org.scalameta"  %%% "munit"                      % "0.7.29" % Test,
-    "co.fs2"         %%% "fs2-io"                     % "3.2.7"  % Test
+    "net.andimiller" %%% "munit-cats-effect-styles" % "2.0.0-M1"  % Test,
+    "org.scalameta"  %%% "munit"                    % "1.0.0-M7" % Test,
+    "co.fs2"         %%% "fs2-io"                   % "3.7.0"  % Test
   )
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core.js, core.jvm, circe.js, circe.jvm)
+  .aggregate(core.js, core.jvm, core.native, circe.js, circe.jvm, circe.native)
   .settings(commonSettings)
   .settings(
     crossScalaVersions := Nil,
@@ -66,7 +66,7 @@ lazy val core = crossProject(runtimes: _*)
   .settings(
     name := "hedgehogs-core",
     libraryDependencies ++= List(
-      "org.typelevel" %%% "cats-core" % "2.7.0"
+      "org.typelevel" %%% "cats-core" % "2.9.0"
     )
   )
 
@@ -77,7 +77,21 @@ lazy val circe = crossProject(runtimes: _*)
   .settings(
     name := "hedgehogs-circe",
     libraryDependencies ++= List(
-      "io.circe" %%% "circe-generic" % "0.14.1",
-      "io.circe" %%% "circe-parser"  % "0.14.1" % Test
+      "io.circe" %%% "circe-generic" % "0.14.5",
+      "io.circe" %%% "circe-parser"  % "0.14.5" % Test
+    )
+  )
+
+lazy val cli = crossProject(runtimes: _*)
+  .in(file("modules/cli"))
+  .dependsOn(circe)
+  .settings(commonSettings: _*)
+  .settings(
+    name := "hedgehogs",
+    libraryDependencies ++= List(
+      "com.monovore" %%% "decline" % "2.4.1",
+      "io.circe" %%% "circe-parser"  % "0.14.5",
+       "org.typelevel" %%% "cats-effect-std" % "3.5.0", 
+       "org.typelevel" %%% "cats-effect" % "3.5.0", 
     )
   )
