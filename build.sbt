@@ -2,7 +2,7 @@ import xerial.sbt.Sonatype._
 import sbtwelcome._
 
 val runtimes       = List(JVMPlatform, JSPlatform)
-val scalaVersions  = List("2.13.6", "3.1.1")
+val scalaVersions  = List("2.13.16", "3.6.3")
 val y              = scala.Console.YELLOW
 val c              = scala.Console.CYAN
 val commonSettings = List(
@@ -29,7 +29,7 @@ val commonSettings = List(
   crossPaths                 := true,
   testFrameworks += new TestFramework("munit.Framework"),
   version                    := "0.2.0",
-  scalaVersion               := "3.1.1",
+  scalaVersion               := "3.6.3",
   ThisBuild / scalafmtConfig := file(".scalafmt.conf"),
   useGpg                     := true,
   publishTo                  := sonatypePublishTo.value,

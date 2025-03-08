@@ -9,6 +9,11 @@ case class Node[Id, Data](id: Id, data: Data)
 
 case class Graph[Id, Data, Distance](nodes: Map[Id, Data], edges: Map[Id, Vector[(Id, Distance)]]) {
   def neighbours(id: Id): Vector[(Id, Distance)] = edges.getOrElse(id, Vector.empty)
+  def removed(id: Id): Graph[Id, Data, Distance] =
+    copy(
+      nodes = nodes.removed(id),
+      edges = edges.removed(id).view.mapValues(_.filter(_._1 != id)).toMap
+    )
 }
 
 object Graph {

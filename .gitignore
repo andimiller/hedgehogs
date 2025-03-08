@@ -3,3 +3,4 @@ project/project
 .bsp
 .idea
 .metals
+.bloop
