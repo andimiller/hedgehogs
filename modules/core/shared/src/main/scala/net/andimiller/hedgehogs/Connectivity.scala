@@ -7,31 +7,34 @@ import scala.util.Random
 
 object Connectivity {
 
-  def isConnected[Id, Data, Distance](g: Graph[Id, Data, Distance])(implicit r: Random): Eval[Boolean] = {
+  def countDisconnectedSubgraphs[Id](g: SimpleGraph[Id]): Eval[Int] = {
 
-    def recurse(visited: Set[Id]): Eval[Boolean] = {
-      Eval.later {
-        g.edges.toSet.flatMap {
-          case (from, to) if visited(from) =>
-            to.map(_._1).toSet
-          case _ =>
-            Set.empty
+    def recurse(visited: Set[Id], otherComponents: Int): Eval[Int] = {
+      Eval
+        .later {
+          visited.flatMap(g.outgoing) ++ visited.flatMap(g.inbound) -- visited
         }
-      }.flatMap { newNodes =>
-        if (newNodes.isEmpty) {
-          Eval.now(
-            visited.size == g.nodes.size
-          )
-        } else {
-          val expanded = visited ++ newNodes
-          recurse(expanded)
+        .flatMap { newNodes =>
+          if (newNodes.isEmpty) {
+            // we finished building this component
+            val remaining = g.nodes -- visited
+            remaining.headOption match {
+              case None                   =>
+                Eval.now(otherComponents + 1)
+              case Some(nextStartingNode) =>
+                recurse(visited + nextStartingNode, otherComponents + 1)
+            }
+          } else {
+            val expanded = visited ++ newNodes
+            recurse(expanded, otherComponents)
+          }
         }
-      }
     }
 
-    val chosenNode = g.nodes.keys.toVector(r.between(0, g.nodes.size))
-    recurse(Set(chosenNode))
+    g.nodes.headOption match {
+      case Some(chosenNode) => recurse(Set(chosenNode), 0)
+      case None             => Eval.now(0)
+    }
   }
-
 
 }

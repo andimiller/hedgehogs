@@ -53,7 +53,7 @@ val commonSettings = List(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core.js, core.jvm, circe.js, circe.jvm)
+  .aggregate(core.js, core.jvm, mermaid.js, mermaid.jvm)
   .settings(commonSettings)
   .settings(
     crossScalaVersions := Nil,
@@ -70,14 +70,10 @@ lazy val core = crossProject(runtimes: _*)
     )
   )
 
-lazy val circe = crossProject(runtimes: _*)
-  .in(file("modules/circe"))
+lazy val mermaid = crossProject(runtimes: _*)
+  .in(file("modules/mermaid"))
   .dependsOn(core)
   .settings(commonSettings: _*)
   .settings(
-    name := "hedgehogs-circe",
-    libraryDependencies ++= List(
-      "io.circe" %%% "circe-generic" % "0.14.1",
-      "io.circe" %%% "circe-parser"  % "0.14.1" % Test
-    )
+    name := "hedgehogs-mermaid"
   )

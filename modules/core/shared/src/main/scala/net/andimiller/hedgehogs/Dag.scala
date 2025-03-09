@@ -4,24 +4,26 @@ import cats.Eval
 
 object Dag {
 
-  def validate[Id, Data, Distance](g: Graph[Id, Data, Distance]): Eval[Either[String, Unit]] = {
+  def validate[Id](g: SimpleGraph[Id]): Eval[Either[String, Unit]] = {
     // identify nodes without an inbound
-    val hasInbound = g.edges.view.mapValues(_.map(_._1)).values.flatten.toSet
-    val removeMe = g.nodes.keySet -- hasInbound
+    val hasInbound = g.nodes.filter { id => g.inbound(id).nonEmpty }
+    val removeMe   = g.nodes -- hasInbound
     if (removeMe.isEmpty) {
       if (g.nodes.nonEmpty) {
-        Eval.now(Left(s"Detected cycles between: ${g.nodes.keys.mkString(",")}"))
+        Eval.now(Left(s"Detected cycles between: ${g.nodes.mkString(",")}"))
       } else {
         Eval.now(Right(()))
       }
     } else {
-      Eval.later {
-        removeMe.foldLeft(g)(_.removed(_))
-      }.flatMap(validate)
+      Eval
+        .later {
+          removeMe.foldLeft(g)(_.removeNode(_))
+        }
+        .flatMap(validate)
     }
   }
 
-  def isDag[Id, Data, Distance](g: Graph[Id, Data, Distance]): Eval[Boolean] =
+  def isDag[Id](g: SimpleGraph[Id]): Eval[Boolean] =
     validate(g).map(_.isRight)
 
 }

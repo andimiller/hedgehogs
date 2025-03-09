@@ -4,11 +4,13 @@ import cats.implicits.catsSyntaxEitherId
 
 class DagSpec extends munit.FunSuite {
   test("Validate a dag") {
-    val g = Graph.fromIterables(
-      nodes = Vector(Node("a", ()), Node("b", ()), Node("c", ())),
-      edges = Vector(Edge("a", "b", 1), Edge("b", "c", 1)),
-      bidirectional = false
-    ).toOption.get
+    val g = SimpleGraph
+      .empty[String]
+      .addNode("a")
+      .addNode("b")
+      .addNode("c")
+      .addEdge("a", "b")
+      .addEdge("b", "c")
     assertEquals(
       Dag.validate(g).value,
       ().asRight
@@ -16,11 +18,15 @@ class DagSpec extends munit.FunSuite {
   }
 
   test("Validate a dag with a loop") {
-    val g = Graph.fromIterables(
-      nodes = Vector(Node("a", ()), Node("b", ()), Node("c", ())),
-      edges = Vector(Edge("a", "b", 1), Edge("b", "c", 1), Edge("c", "a", 1)),
-      bidirectional = false
-    ).toOption.get
+    val g =
+      SimpleGraph
+        .empty[String]
+        .addNode("a")
+        .addNode("b")
+        .addNode("c")
+        .addEdge("a", "b")
+        .addEdge("b", "c")
+        .addEdge("c", "a")
     assertEquals(
       Dag.validate(g).value,
       "Detected cycles between: a,b,c".asLeft

@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 
 object Dijkstra {
   def apply[Id, Data, Distance: Numeric](
-      g: Graph[Id, Data, Distance]
+      g: DataGraph[Id, Data, Distance]
   )(from: Id, to: Id): Option[(Distance, List[Id])] =
     run[Id, Data, Distance](
       g,
@@ -15,7 +15,7 @@ object Dijkstra {
 
   @tailrec
   def run[Id, Data, Distance: Numeric](
-      g: Graph[Id, Data, Distance],
+      g: DataGraph[Id, Data, Distance],
       paths: List[(Distance, List[Id])],
       target: Id,
       visited: Set[Id]
@@ -26,7 +26,7 @@ object Dijkstra {
           case head :: _ if head == target => Some((distance, path.reverse))
           case head :: _                   =>
             val extraPaths: List[(Distance, List[Id])] =
-              g.neighbours(head).toList.flatMap {
+              g.outgoingEdges(head).toList.flatMap {
                 case (key, _) if visited.contains(key) => List.empty
                 case (key, d)                          =>
                   List((Numeric[Distance].plus(distance, d), key :: path))
@@ -39,7 +39,7 @@ object Dijkstra {
     }
 
   def multi[Id, Data, Distance: Numeric](
-      g: Graph[Id, Data, Distance]
+      g: DataGraph[Id, Data, Distance]
   )(from: Id, to: Set[Id]): Map[Id, (Distance, List[Id])] =
     runMulti[Id, Data, Distance](
       g,
@@ -51,7 +51,7 @@ object Dijkstra {
 
   @tailrec
   def runMulti[Id, Data, Distance: Numeric](
-      g: Graph[Id, Data, Distance],
+      g: DataGraph[Id, Data, Distance],
       paths: List[(Distance, List[Id])],
       targets: Set[Id],
       visited: Set[Id],
@@ -64,7 +64,7 @@ object Dijkstra {
             solutions + (head -> (distance, path.reverse))
           case head :: _                         =>
             val extraPaths: List[(Distance, List[Id])] =
-              g.neighbours(head).toList.flatMap {
+              g.outgoingEdges(head).toList.flatMap {
                 case (key, _) if visited.contains(key) => List.empty
                 case (key, d)                          =>
                   List((Numeric[Distance].plus(distance, d), key :: path))
