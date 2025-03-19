@@ -6,8 +6,8 @@ class DijkstraSpec extends munit.FunSuite {
   test("route in a directional graph") {
     val g = DataGraph
       .empty[String, String, Int]
-      .addNode("abc")
-      .addNode("def")
+      .addNode("abc", "")
+      .addNode("def", "")
       .addEdge("abc", "def", 10)
     assertEquals(
       obtained = Dijkstra(g)("abc", "def"),
@@ -44,8 +44,8 @@ class DijkstraSpec extends munit.FunSuite {
   test("route in a bidirectional graph") {
     val g = DataGraph
       .empty[String, String, Int]
-      .addNode("abc")
-      .addNode("def")
+      .addNode("abc", "")
+      .addNode("def", "")
       .addEdge("abc", "def", 10)
       .addEdge("def", "abc", 5)
     assertEquals(
@@ -61,8 +61,8 @@ class DijkstraSpec extends munit.FunSuite {
     val g =
       DataGraph
         .empty[String, String, Int]
-        .addNode("abc")
-        .addNode("def")
+        .addNode("abc", "")
+        .addNode("def", "")
         .addEdge("abc", "def", 10)
 
     assertEquals(
