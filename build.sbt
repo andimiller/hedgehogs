@@ -53,7 +53,7 @@ val commonSettings = List(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core.js, core.jvm, mermaid.js, mermaid.jvm)
+  .aggregate(core.js, core.jvm, mermaid.js, mermaid.jvm, `dag-visitor`.js, `dag-visitor`.jvm)
   .settings(commonSettings)
   .settings(
     crossScalaVersions := Nil,
@@ -85,7 +85,7 @@ lazy val `dag-visitor` = crossProject(runtimes: _*)
   .settings(
     name := "hedgehogs-dag-visitor",
     libraryDependencies ++= List(
-      "org.typelevel" %% "cats-effect"         % "3.5.7",
-      "org.typelevel" %% "cats-effect-testkit" % "3.5.7" % Test
+      "org.typelevel" %%% "cats-effect"         % "3.5.7",
+      "org.typelevel" %%% "cats-effect-testkit" % "3.5.7" % Test
     )
   )
