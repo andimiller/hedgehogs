@@ -12,6 +12,8 @@ trait SimpleGraph[Id] {
   def outgoing(id: Id): Set[Id]
   def inbound(id: Id): Set[Id]
 
+  def reverse: SimpleGraph[Id]
+
   // modifiers
   def addNode(id: Id): SimpleGraph[Id]
   def removeNode(id: Id): SimpleGraph[Id]
@@ -56,6 +58,11 @@ case class AdjacencyListSimpleGraph[Id](nodes: Set[Id], edges: Set[(Id, Id)]) ex
       edges.map { case (from, to) =>
         f(from) -> f(to)
       }
+    )
+
+  override def reverse: SimpleGraph[Id] =
+    copy(
+      edges = edges.map(_.swap)
     )
 }
 
