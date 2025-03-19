@@ -37,3 +37,17 @@ Scala Targets: JVM, JS
 ## `flowchart`
 
 * Can render any `DataGraph` which is a DAG into a mermaid graph
+
+# Dag Visitor
+
+## `DagVisitor[F[_], Id, InputNodeData, OutputNodeData, EdgeData]`
+
+* Interface which can be implemented to describe how to run a `DataGraph`
+
+## `DagVisitor.runConcurrent`
+
+* Runs a `DagVisitor` against a compatible `DataGraph`
+* Runs concurrently, starts nodes as soon as they can be run
+* Can run different `RunMode`s, indicating the direction edges run
+  * `Flow` will make `A->B` run `A` then `B`, this is the default
+  * `Dependency` will make `A->B` run `B` then `A`
