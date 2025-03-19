@@ -77,3 +77,15 @@ lazy val mermaid = crossProject(runtimes: _*)
   .settings(
     name := "hedgehogs-mermaid"
   )
+
+lazy val `dag-visitor` = crossProject(runtimes: _*)
+  .in(file("modules/dag-visitor"))
+  .dependsOn(core)
+  .settings(commonSettings: _*)
+  .settings(
+    name := "hedgehogs-dag-visitor",
+    libraryDependencies ++= List(
+      "org.typelevel" %% "cats-effect"         % "3.5.7",
+      "org.typelevel" %% "cats-effect-testkit" % "3.5.7" % Test
+    )
+  )

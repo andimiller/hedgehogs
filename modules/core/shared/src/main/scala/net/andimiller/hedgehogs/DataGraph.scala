@@ -19,21 +19,49 @@ trait DataGraph[Id, NodeData, EdgeData] extends SimpleGraph[Id] { self =>
   def removeNode(id: Id): DataGraph[Id, NodeData, EdgeData]
   def addEdge(from: Id, to: Id): DataGraph[Id, NodeData, EdgeData]
   def removeEdge(from: Id, to: Id): DataGraph[Id, NodeData, EdgeData]
+  def reverse: DataGraph[Id, NodeData, EdgeData]
 
   def map[Id2](f: Id => Id2): DataGraph[Id2, NodeData, EdgeData]
-  def mapNode[NodeData2: Monoid](f: NodeData => NodeData2): DataGraph[Id, NodeData2, EdgeData]
-  def mapEdge[EdgeData2: Monoid](f: EdgeData => EdgeData2): DataGraph[Id, NodeData, EdgeData2]
+  def mapNode[NodeData2](f: NodeData => NodeData2): DataGraph[Id, NodeData2, EdgeData]
+  def mapEdge[EdgeData2](f: EdgeData => EdgeData2): DataGraph[Id, NodeData, EdgeData2]
 }
 
 object DataGraph {
-  def empty[Id, NodeData: Monoid, EdgeData: Monoid]: DataGraph[Id, NodeData, EdgeData] =
+  def empty[Id, NodeData, EdgeData]: DataGraph[Id, NodeData, EdgeData] =
     new AdjacencyListDataGraph[Id, NodeData, EdgeData](Map.empty, Map.empty)
+
+  implicit def monoid[Id, NodeData, EdgeData]: Monoid[DataGraph[Id, NodeData, EdgeData]] =
+    new Monoid[DataGraph[Id, NodeData, EdgeData]] {
+      override def empty: DataGraph[Id, NodeData, EdgeData] = DataGraph.empty[Id, NodeData, EdgeData]
+
+      override def combine(
+          x: DataGraph[Id, NodeData, EdgeData],
+          y: DataGraph[Id, NodeData, EdgeData]
+      ): DataGraph[Id, NodeData, EdgeData] =
+        new AdjacencyListDataGraph[Id, NodeData, EdgeData](
+          x.nodeMap ++ y.nodeMap,
+          x.edgeMap ++ y.edgeMap
+        )
+    }
 }
 
-case class AdjacencyListDataGraph[Id, NodeData: Monoid, EdgeData: Monoid](
+case class AdjacencyListDataGraph[Id, NodeData, EdgeData](
     nodeMap: Map[Id, NodeData],
-    edgeMap: Map[(Id, Id), EdgeData]
+    edgeMap: Map[(Id, Id), EdgeData],
+    emptyNode: Option[NodeData] = None,
+    emptyEdge: Option[EdgeData] = None
 ) extends DataGraph[Id, NodeData, EdgeData] {
+
+  private lazy val emptyNodeOrThrow: NodeData = emptyNode.getOrElse(
+    throw new Exception(
+      "No default emptyNode available, please supply one when making the type if you want to add with defaults"
+    )
+  )
+  private lazy val emptyEdgeOrThrow: EdgeData = emptyEdge.getOrElse(
+    throw new Exception(
+      "No default emptyEdge available, please supply one when making the type if you want to add with defaults"
+    )
+  )
 
   override def nodes: Set[Id] = nodeMap.keySet
 
@@ -41,7 +69,7 @@ case class AdjacencyListDataGraph[Id, NodeData: Monoid, EdgeData: Monoid](
 
   override def addNode(id: Id): DataGraph[Id, NodeData, EdgeData] =
     copy(
-      nodeMap = nodeMap.updated(id, Monoid[NodeData].empty)
+      nodeMap = nodeMap.updated(id, emptyNodeOrThrow)
     )
 
   override def addNode(id: Id, data: NodeData): DataGraph[Id, NodeData, EdgeData] =
@@ -59,7 +87,7 @@ case class AdjacencyListDataGraph[Id, NodeData: Monoid, EdgeData: Monoid](
 
   override def addEdge(from: Id, to: Id): DataGraph[Id, NodeData, EdgeData] =
     copy(
-      edgeMap = edgeMap.updated((from, to), Monoid[EdgeData].empty)
+      edgeMap = edgeMap.updated((from, to), emptyEdgeOrThrow)
     )
 
   override def addEdge(from: Id, to: Id, data: EdgeData): DataGraph[Id, NodeData, EdgeData] =
@@ -91,15 +119,20 @@ case class AdjacencyListDataGraph[Id, NodeData: Monoid, EdgeData: Monoid](
       }
     )
 
-  override def mapNode[NodeData2: Monoid](f: NodeData => NodeData2): DataGraph[Id, NodeData2, EdgeData] =
+  override def mapNode[NodeData2](f: NodeData => NodeData2): DataGraph[Id, NodeData2, EdgeData] =
     new AdjacencyListDataGraph[Id, NodeData2, EdgeData](
       nodeMap.view.mapValues(f).toMap,
       edgeMap
     )
 
-  override def mapEdge[EdgeData2: Monoid](f: EdgeData => EdgeData2): DataGraph[Id, NodeData, EdgeData2] =
+  override def mapEdge[EdgeData2](f: EdgeData => EdgeData2): DataGraph[Id, NodeData, EdgeData2] =
     new AdjacencyListDataGraph[Id, NodeData, EdgeData2](
       nodeMap,
       edgeMap.view.mapValues(f).toMap
+    )
+
+  override def reverse: DataGraph[Id, NodeData, EdgeData] =
+    copy(
+      edgeMap = edgeMap.map { case (tuple, data) => tuple.swap -> data }
     )
 }
