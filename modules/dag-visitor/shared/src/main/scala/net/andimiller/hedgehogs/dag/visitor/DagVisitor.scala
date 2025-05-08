@@ -1,7 +1,6 @@
 package net.andimiller.hedgehogs.dag.visitor
 
 import cats.implicits._
-import cats.Monad
 import cats.effect.implicits.genSpawnOps
 import cats.effect.{Concurrent, Deferred, Fiber, Ref, Resource}
 import net.andimiller.hedgehogs.DataGraph
@@ -43,7 +42,7 @@ object DagVisitor {
     override def getCause: Throwable = t
   }
 
-  def runConcurrent[F[_]: Concurrent: Monad, Id, InputData, OutputData, EdgeData](
+  def runConcurrent[F[_]: Concurrent, Id, InputData, OutputData, EdgeData](
       visitor: DagVisitor[F, Id, InputData, OutputData, EdgeData],
       direction: RunMode = RunMode.Flow
   )(

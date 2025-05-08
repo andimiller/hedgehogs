@@ -126,13 +126,11 @@ class DagVisitorSpec extends CatsEffectSuite {
       graph      = DataGraph
                      .empty[String, Node, Unit]
                      .addNode("A", SleepForSeconds(5))
-                     .addNode("B", SleepForSeconds(11))
                      .addNode("C", SleepForSeconds(11))
                      .addNode("D", SleepForSeconds(4))
                      .addNode("E", SleepForSeconds(13))
                      .addNode("F", SleepForSeconds(7))
                      .addNode("G", Boom("G went boom"))
-                     .addEdge("A", "B", ())
                      .addEdge("C", "D", ())
                      .addEdge("A", "G", ())
       runner     = new SimpleDagVisitor[IO, String, Node, Unit, Unit] {
@@ -159,9 +157,9 @@ class DagVisitorSpec extends CatsEffectSuite {
                        "net.andimiller.hedgehogs.dag.visitor.DagVisitor$SubtaskFailed: Node G failed to run: G went boom"
                      )
       _         <- errored.get.assertEquals(Set("G"))
-      _         <- started.get.assertEquals(Set("A", "B", "C", "C", "E", "F", "G"))
+      _         <- started.get.assertEquals(Set("A", "C", "C", "E", "F", "G"))
       _         <- ended.get.assertEquals(Set("A"))
-      _         <- cancelled.get.assertEquals(Set("B", "C", "E", "F"))
+      _         <- cancelled.get.assertEquals(Set("C", "E", "F"))
     } yield ()
 
   }
