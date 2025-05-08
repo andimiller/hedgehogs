@@ -1,5 +1,8 @@
 package net.andimiller.hedgehogs
 
+import cats.data.NonEmptyList
+import cats.implicits.catsSyntaxValidatedId
+
 class DataGraphSpec extends munit.FunSuite {
 
   test("Build a graph from an empty graph") {
@@ -68,7 +71,45 @@ class DataGraphSpec extends munit.FunSuite {
         )
       )
     )
+  }
 
+  test("Validate a graph") {
+    val graph = DataGraph
+      .empty[String, Int, Unit] // the number in each node should be the number of inbounds
+      .addNode("good0", 0)
+      .addNode("bad0", 0)
+      .addNode("good1", 1)
+      .addNode("bad1", 1)
+      .addNode("good2", 2)
+      .addNode("bad2", 2)
+      .addEdge("good0", "bad0", ())
+      .addEdge("bad1", "good1", ())
+      .addEdge("good0", "bad1", ())
+      .addEdge("bad0", "bad1", ())
+      .addEdge("good0", "good2", ())
+      .addEdge("bad1", "good2", ())
+      .addEdge("bad0", "bad2", ())
+
+    val result = graph
+      .traverseNode { case (k, v) =>
+        val inbounds = graph.inbound(k).size
+        if (inbounds == v)
+          v.validNel
+        else
+          s"node $k had $inbounds inbound edges, expected $v".invalidNel
+      }
+      .leftMap(_.sorted)
+
+    assertEquals(
+      result,
+      NonEmptyList
+        .of(
+          "node bad0 had 1 inbound edges, expected 0",
+          "node bad1 had 2 inbound edges, expected 1",
+          "node bad2 had 1 inbound edges, expected 2"
+        )
+        .invalid
+    )
   }
 
 }

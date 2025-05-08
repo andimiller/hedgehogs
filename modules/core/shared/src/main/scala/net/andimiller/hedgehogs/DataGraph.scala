@@ -1,6 +1,8 @@
 package net.andimiller.hedgehogs
 
+import cats.{Applicative, Bitraverse, Eval, UnorderedTraverse}
 import cats.kernel.Monoid
+import cats.implicits._
 
 trait DataGraph[Id, NodeData, EdgeData] extends SimpleGraph[Id] { self =>
   // data
@@ -24,6 +26,11 @@ trait DataGraph[Id, NodeData, EdgeData] extends SimpleGraph[Id] { self =>
   def map[Id2](f: Id => Id2): DataGraph[Id2, NodeData, EdgeData]
   def mapNode[NodeData2](f: NodeData => NodeData2): DataGraph[Id, NodeData2, EdgeData]
   def mapEdge[EdgeData2](f: EdgeData => EdgeData2): DataGraph[Id, NodeData, EdgeData2]
+
+  def traverse[F[_]: Applicative, Id2](f: Id => F[Id2]): F[DataGraph[Id2, NodeData, EdgeData]]
+  def traverseNode[F[_]: Applicative, NodeData2](
+      f: (Id, NodeData) => F[NodeData2]
+  ): F[DataGraph[Id, NodeData2, EdgeData]]
 }
 
 object DataGraph {
@@ -135,4 +142,38 @@ case class AdjacencyListDataGraph[Id, NodeData, EdgeData](
     copy(
       edgeMap = edgeMap.map { case (tuple, data) => tuple.swap -> data }
     )
+
+  override def traverse[F[_]: Applicative, Id2](f: Id => F[Id2]): F[DataGraph[Id2, NodeData, EdgeData]] =
+    (
+      nodeMap.toVector
+        .traverse { case (k, v) =>
+          f(k).tupleRight(v)
+        },
+      edgeMap.toVector
+        .traverse { case ((from, to), data) =>
+          (f(from), f(to)).mapN { case (f, t) =>
+            ((f, t), data)
+          }
+        }
+    ).mapN { case (nm, em) =>
+      copy(
+        nm.toMap,
+        em.toMap
+      )
+    }
+
+  override def traverseNode[F[_]: Applicative, NodeData2](
+      f: (Id, NodeData) => F[NodeData2]
+  ): F[DataGraph[Id, NodeData2, EdgeData]] = {
+    nodeMap.toVector
+      .traverse { case (k, v) =>
+        f(k, v).tupleLeft(k)
+      }
+      .map { nm =>
+        new AdjacencyListDataGraph[Id, NodeData2, EdgeData](
+          nm.toMap,
+          edgeMap
+        )
+      }
+  }
 }
