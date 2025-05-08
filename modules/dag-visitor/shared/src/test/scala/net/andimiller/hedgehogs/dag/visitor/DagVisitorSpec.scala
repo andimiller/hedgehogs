@@ -112,4 +112,57 @@ class DagVisitorSpec extends CatsEffectSuite {
 
   }
 
+  test("Stop early if one subtask fails") {
+
+    sealed trait Node
+    case class SleepForSeconds(seconds: Int) extends Node
+    case class Boom(msg: String)             extends Node
+
+    for {
+      started   <- Ref.of[IO, Set[String]](Set.empty)
+      ended     <- Ref.of[IO, Set[String]](Set.empty)
+      errored   <- Ref.of[IO, Set[String]](Set.empty)
+      cancelled <- Ref.of[IO, Set[String]](Set.empty)
+      graph      = DataGraph
+                     .empty[String, Node, Unit]
+                     .addNode("A", SleepForSeconds(5))
+                     .addNode("B", SleepForSeconds(11))
+                     .addNode("C", SleepForSeconds(11))
+                     .addNode("D", SleepForSeconds(4))
+                     .addNode("E", SleepForSeconds(13))
+                     .addNode("F", SleepForSeconds(7))
+                     .addNode("G", Boom("G went boom"))
+                     .addEdge("A", "B", ())
+                     .addEdge("C", "D", ())
+                     .addEdge("A", "G", ())
+      runner     = new SimpleDagVisitor[IO, String, Node, Unit, Unit] {
+                     override def run(id: String, node: Node, inputs: Map[String, Unit]): IO[Unit] = {
+                       ((started.update(_ + id)) *> (node match {
+                         case SleepForSeconds(seconds) => IO.sleep(seconds.seconds)
+                         case Boom(msg)                => IO.raiseError(new Throwable(msg))
+                       }) *> ended.update(_ + id))
+                         .onError(_ => errored.update(_ + id))
+                         .onCancel(cancelled.update(_ + id))
+                     }
+                   }
+      _         <- TestControl
+                     .execute(
+                       DagVisitor.runConcurrent(runner)(graph).timeout(10.seconds).void
+                     )
+                     .flatMap { control =>
+                       control.tickFor(10.seconds) *> control.results
+                     }
+                     .map { case Some(Errored(e)) =>
+                       e.toString
+                     }
+                     .assertEquals(
+                       "net.andimiller.hedgehogs.dag.visitor.DagVisitor$SubtaskFailed: Node G failed to run: G went boom"
+                     )
+      _         <- errored.get.assertEquals(Set("G"))
+      _         <- started.get.assertEquals(Set("A", "B", "C", "C", "E", "F", "G"))
+      _         <- ended.get.assertEquals(Set("A"))
+      _         <- cancelled.get.assertEquals(Set("B", "C", "E", "F"))
+    } yield ()
+
+  }
 }
