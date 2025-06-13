@@ -78,7 +78,14 @@ object Counter extends TyrianIOApp[Msg, Model]:
           }
         }
       }
-      (model.copy(startTime = Instant.now()), Cmd.Run(DagVisitor.runConcurrent(runner)(program).as(Msg.NoOp)))
+      (
+        model.copy(
+          startTime = Instant.now(),
+          messages = Vector(),
+          graph = model.graph.mapNode { case (n, _) => n -> State.Waiting }
+        ),
+        Cmd.Run(DagVisitor.runConcurrent(runner)(program).as(Msg.NoOp))
+      )
     case Msg.QueueCreated(q)        =>
       (model.copy(queue = Some(q)), Cmd.None)
     case Msg.UpdateNodeState(id, s) =>
