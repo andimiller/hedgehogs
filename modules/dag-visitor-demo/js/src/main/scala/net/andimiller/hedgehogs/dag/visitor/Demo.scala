@@ -182,26 +182,7 @@ object Demo extends TyrianIOApp[Msg, Model]:
     case Msg.ClearLog               =>
       (model.copy(messages = Vector()), Cmd.None)
 
-  // keep track of svg sizing
-  val centerX = 200.0
-  val centerY = 200.0
-  val radius  = 400.0 / 3.0
-
   def view(model: Model): Html[Msg] =
-    val nodePositions: Map[String, (Double, Double)] = {
-      val n = model.graph.nodes.size
-      if (n == 0) Map.empty
-      else {
-        val step = (2 * math.Pi) / n
-        model.graph.nodes.zipWithIndex.map { case (node, idx) =>
-          val angle = idx * step
-          val x     = centerX + radius * math.cos(angle)
-          val y     = centerY + radius * math.sin(angle)
-          node -> (x, y)
-        }.toMap
-      }
-    }
-
     div(
       h1("Hedgehogs Concurrent Visitor Demo"),
       p(
@@ -291,14 +272,18 @@ object Demo extends TyrianIOApp[Msg, Model]:
       case Some(queue) => Sub.make("events", fs2.Stream.eval(queue.take).map(Msg.UpdateNodeState.apply).repeat)
 
 enum Msg:
-  case Reroll
-  case Start
-  case NoOp
+  // setup events
   case QueueCreated(queue: Queue[IO, (String, State)])
-  case UpdateNodeState(node: String, state: State)
-  case NodeCount(n: Int)
-  case EdgeCount(e: Int)
-  case Log(msg: Html[Msg])
-  case ClearLog
   case LoadGraphviz
   case GraphvizLoaded(g: Graphviz)
+  // user interaction
+  case Reroll
+  case Start
+  case NodeCount(n: Int)
+  case EdgeCount(e: Int)
+  // respond to user
+  case Log(msg: Html[Msg])
+  case UpdateNodeState(node: String, state: State)
+  case ClearLog
+  //
+  case NoOp
