@@ -40,11 +40,12 @@ case class Model(
     messages: Vector[Html[Msg]],
     queue: Option[Queue[IO, (String, State)]],
     nodes: Int = 5,
-    edges: Int = 5
+    edges: Int = 5,
+    graphviz: Option[Graphviz] = None
 )
 
 @JSExportTopLevel("TyrianApp")
-object Counter extends TyrianIOApp[Msg, Model]:
+object Demo extends TyrianIOApp[Msg, Model]:
 
   def makeProgram(nodes: Int, edges: Int): DataGraph[String, Node, Unit] = {
     val nodeGraph   = (('A' to 'Z') ++ ('a' to 'z'))
@@ -78,7 +79,8 @@ object Counter extends TyrianIOApp[Msg, Model]:
       Model(Instant.now(), makeProgram(5, 5).mapNode(n => (n, State.Waiting)), Vector(), None),
       Cmd.Batch(
         Cmd.Run(Queue.unbounded[IO, (String, State)].map(Msg.QueueCreated.apply)),
-        Cmd.Emit(Msg.Reroll)
+        Cmd.Emit(Msg.Reroll),
+        Cmd.Emit(Msg.LoadGraphviz)
       )
     )
 
@@ -124,6 +126,16 @@ object Counter extends TyrianIOApp[Msg, Model]:
             )
           )
         )
+      )
+    case Msg.LoadGraphviz           =>
+      (
+        model,
+        Cmd.Run(GraphvizIO.load().map(Msg.GraphvizLoaded.apply))
+      )
+    case Msg.GraphvizLoaded(g)      =>
+      (
+        model.copy(graphviz = Some(g)),
+        Cmd.Emit(Msg.Log(Html.span(text("Graphviz loaded"))))
       )
     case Msg.NodeCount(n)           =>
       (
@@ -253,58 +265,14 @@ object Counter extends TyrianIOApp[Msg, Model]:
           button(onClick(Msg.Start))("Start")
         ),
         div(
-          style := "float: right;"
+          style := "float: right; width: 400px; min-height: 400px;"
         )(
           h2("Graph"),
-          svg(viewBox := "0, 0, 400, 400", width := "400px")(
-            List(
-              marker(
-                attr("markerWidth")  := "25",
-                attr("markerHeight") := "25",
-                viewBox              := "0 0 50 50",
-                attr("refX")         := "25",
-                attr("refY")         := "25",
-                attr("orient")       := "auto-start-reverse",
-                id                   := "arrowhead",
-                stroke               := "grey",
-                fill                 := "grey",
-                style                := "stroke-width: 2px; stroke grey;"
-              )(
-                path(
-                  d                  := "M 0 0 L 50 25 L 0 50 z"
-                )
-              )
-            ) ++ model.graph.edges.toList.map { case (from, to) =>
-              val (x1d, y1d) = nodePositions(from)
-              val (x2d, y2d) = nodePositions(to)
-              val (xm, ym)   = ((x1d + x2d) / 2, (y1d + y2d) / 2)
-              polyline(
-                points               := s"$x1d,$y1d $xm,$ym $x2d,$y2d",
-                stroke               := "grey",
-                attr("marker-mid")   := "url(#arrowhead)",
-                attr("marker-end")   := "url(#arrowhead)",
-                attr("marker-start") := "url(#arrowhead)"
-              )
-            } ++ model.graph.nodeMap.toList.map { case (id, (node, state)) =>
-              val (x, y) = nodePositions(id)
-              g(
-                circle(
-                  cx     := x.toString,
-                  cy     := y.toString,
-                  r      := "20",
-                  fill   := state.toColour,
-                  stroke := "grey"
-                ),
-                tag("text")(
-                  attr("x")                 := x,
-                  attr("y")                 := y,
-                  style                     := "font-family: Sans,Arial;",
-                  attr("text-anchor")       := "middle",
-                  attr("dominant-baseline") := "middle"
-                )(text(show"$id"))
-              )
+          model.graphviz
+            .map { gv =>
+              Html.raw("div")(gv.dot(Digraph(model.graph.mapNode(_._2)), "svg_inline"))
             }
-          )
+            .getOrElse(div(text("Waiting for graphviz wasm to load")))
         )
       ),
       div(
@@ -332,3 +300,5 @@ enum Msg:
   case EdgeCount(e: Int)
   case Log(msg: Html[Msg])
   case ClearLog
+  case LoadGraphviz
+  case GraphvizLoaded(g: Graphviz)

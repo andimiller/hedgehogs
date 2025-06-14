@@ -95,11 +95,11 @@ lazy val `dag-visitor-demo` = crossProject(JSPlatform)
   .dependsOn(`dag-visitor`)
   .settings(commonSettings: _*)
   .settings(
-    name := "hedgehogs-dag-visitor-demo",
+    name               := "hedgehogs-dag-visitor-demo",
     libraryDependencies ++= List(
-      "io.indigoengine" %%% "tyrian-io" % "0.14.0",
+      "io.indigoengine"   %%% "tyrian-io"       % "0.14.0",
       "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
     ),
-    crossScalaVersions         := scalaVersions.filter(_.startsWith("3")),
+    crossScalaVersions := scalaVersions.filter(_.startsWith("3")),
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
   )
