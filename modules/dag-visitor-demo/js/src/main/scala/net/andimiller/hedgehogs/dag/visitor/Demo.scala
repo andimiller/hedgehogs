@@ -47,8 +47,10 @@ case class Model(
 @JSExportTopLevel("TyrianApp")
 object Demo extends TyrianIOApp[Msg, Model]:
 
+  val nodeNames: Seq[String] = (('A' to 'Z') ++ ('a' to 'z')).map(_.toString)
+
   def makeProgram(nodes: Int, edges: Int): DataGraph[String, Node, Unit] = {
-    val nodeGraph   = (('A' to 'Z') ++ ('a' to 'z'))
+    val nodeGraph   = nodeNames
       .take(nodes)
       .foldLeft(
         DataGraph.empty[String, Node, Unit]
@@ -154,9 +156,13 @@ object Demo extends TyrianIOApp[Msg, Model]:
     case Msg.QueueCreated(q)        =>
       (model.copy(queue = Some(q)), Cmd.None)
     case Msg.UpdateNodeState(id, s) =>
-      val now       = Instant.now()
-      val ts        = Duration.between(model.startTime, now).getSeconds()
-      val nextGraph = model.graph.addNode(id, model.graph.nodeMap(id)._1 -> s)
+      val now          = Instant.now()
+      val ts           = Duration.between(model.startTime, now).getSeconds()
+      val nextGraph    = model.graph.addNode(id, model.graph.nodeMap(id)._1 -> s)
+      val stateUpdates = Cmd.Batch(nextGraph.nodeMap.view.mapValues(_._2).toList.map { case (id, state) =>
+        println(s"setting $id to $state")
+        CssVariables.set[IO, Msg](s"--$id-fill", state.toColour)
+      })
       (
         model.copy(
           graph = nextGraph
@@ -167,7 +173,7 @@ object Demo extends TyrianIOApp[Msg, Model]:
             Option.when(nextGraph.nodeMap.values.map(_._2).forall(_ == State.Done))(
               Msg.Log(Html.span(text("Graph has is all "), State.Done.toHtml))
             )
-          ).flatten.map(Cmd.Emit.apply)
+          ).flatten.map(Cmd.Emit.apply).appended(stateUpdates)
         )
       )
     case Msg.Log(msg)               =>
@@ -251,7 +257,9 @@ object Demo extends TyrianIOApp[Msg, Model]:
           h2("Graph"),
           model.graphviz
             .map { gv =>
-              Html.raw("div")(gv.dot(Digraph(model.graph.mapNode(_._2)), "svg_inline"))
+              val h = model.graph.mapNode(__ => ()).hashCode()
+              println(s"rendering graph with hash $h")
+              Html.raw("div")(gv.dot(Digraph(model.graph.mapNode(_ => ())), "svg_inline")).withKey(Some(h.toString))
             }
             .getOrElse(div(text("Waiting for graphviz wasm to load")))
         )

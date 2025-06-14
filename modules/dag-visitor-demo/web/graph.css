@@ -1,0 +1,111 @@
+g.node ellipse {
+  transition: fill 0.5s ease;
+}
+
+:root {
+  --A-fill: white;
+  --B-fill: white;
+  --C-fill: white;
+  --D-fill: white;
+  --E-fill: white;
+  --F-fill: white;
+  --G-fill: white;
+  --H-fill: white;
+  --I-fill: white;
+  --J-fill: white;
+  --K-fill: white;
+  --L-fill: white;
+  --M-fill: white;
+  --N-fill: white;
+  --O-fill: white;
+  --P-fill: white;
+  --Q-fill: white;
+  --R-fill: white;
+  --S-fill: white;
+  --T-fill: white;
+  --U-fill: white;
+  --V-fill: white;
+  --W-fill: white;
+  --X-fill: white;
+  --Y-fill: white;
+  --Z-fill: white;
+  --a-fill: white;
+  --b-fill: white;
+  --c-fill: white;
+  --d-fill: white;
+  --e-fill: white;
+  --f-fill: white;
+  --g-fill: white;
+  --h-fill: white;
+  --i-fill: white;
+  --j-fill: white;
+  --k-fill: white;
+  --l-fill: white;
+  --m-fill: white;
+  --n-fill: white;
+  --o-fill: white;
+  --p-fill: white;
+  --q-fill: white;
+  --r-fill: white;
+  --s-fill: white;
+  --t-fill: white;
+  --u-fill: white;
+  --v-fill: white;
+  --w-fill: white;
+  --x-fill: white;
+  --y-fill: white;
+  --z-fill: white;
+}
+
+g.node#A ellipse { fill: var(--A-fill); }
+g.node#B ellipse { fill: var(--B-fill); }
+g.node#C ellipse { fill: var(--C-fill); }
+g.node#D ellipse { fill: var(--D-fill); }
+g.node#E ellipse { fill: var(--E-fill); }
+g.node#F ellipse { fill: var(--F-fill); }
+g.node#G ellipse { fill: var(--G-fill); }
+g.node#H ellipse { fill: var(--H-fill); }
+g.node#I ellipse { fill: var(--I-fill); }
+g.node#J ellipse { fill: var(--J-fill); }
+g.node#K ellipse { fill: var(--K-fill); }
+g.node#L ellipse { fill: var(--L-fill); }
+g.node#M ellipse { fill: var(--M-fill); }
+g.node#N ellipse { fill: var(--N-fill); }
+g.node#O ellipse { fill: var(--O-fill); }
+g.node#P ellipse { fill: var(--P-fill); }
+g.node#Q ellipse { fill: var(--Q-fill); }
+g.node#R ellipse { fill: var(--R-fill); }
+g.node#S ellipse { fill: var(--S-fill); }
+g.node#T ellipse { fill: var(--T-fill); }
+g.node#U ellipse { fill: var(--U-fill); }
+g.node#V ellipse { fill: var(--V-fill); }
+g.node#W ellipse { fill: var(--W-fill); }
+g.node#X ellipse { fill: var(--X-fill); }
+g.node#Y ellipse { fill: var(--Y-fill); }
+g.node#Z ellipse { fill: var(--Z-fill); }
+g.node#a ellipse { fill: var(--a-fill); }
+g.node#b ellipse { fill: var(--b-fill); }
+g.node#c ellipse { fill: var(--c-fill); }
+g.node#d ellipse { fill: var(--d-fill); }
+g.node#e ellipse { fill: var(--e-fill); }
+g.node#f ellipse { fill: var(--f-fill); }
+g.node#g ellipse { fill: var(--g-fill); }
+g.node#h ellipse { fill: var(--h-fill); }
+g.node#i ellipse { fill: var(--i-fill); }
+g.node#j ellipse { fill: var(--j-fill); }
+g.node#k ellipse { fill: var(--k-fill); }
+g.node#l ellipse { fill: var(--l-fill); }
+g.node#m ellipse { fill: var(--m-fill); }
+g.node#n ellipse { fill: var(--n-fill); }
+g.node#o ellipse { fill: var(--o-fill); }
+g.node#p ellipse { fill: var(--p-fill); }
+g.node#q ellipse { fill: var(--q-fill); }
+g.node#r ellipse { fill: var(--r-fill); }
+g.node#s ellipse { fill: var(--s-fill); }
+g.node#t ellipse { fill: var(--t-fill); }
+g.node#u ellipse { fill: var(--u-fill); }
+g.node#v ellipse { fill: var(--v-fill); }
+g.node#w ellipse { fill: var(--w-fill); }
+g.node#x ellipse { fill: var(--x-fill); }
+g.node#y ellipse { fill: var(--y-fill); }
+g.node#z ellipse { fill: var(--z-fill); }
