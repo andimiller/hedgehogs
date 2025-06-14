@@ -105,6 +105,7 @@ object Demo extends TyrianIOApp[Msg, Model]:
         ),
         Cmd.Batch(
           Cmd.Emit(Msg.ClearLog),
+          Cmd.Emit(Msg.SyncNodeColours),
           Cmd.Run(DagVisitor.runConcurrent(runner)(model.graph.mapNode(_._1)).as(Msg.NoOp))
         )
       )
