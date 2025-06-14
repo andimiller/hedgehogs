@@ -256,9 +256,8 @@ object Demo extends TyrianIOApp[Msg, Model]:
           h2("Graph"),
           model.graphviz
             .map { gv =>
-              val h = model.graph.mapNode(__ => ()).hashCode()
-              println(s"rendering graph with hash $h")
-              Html.raw("div")(gv.dot(Digraph(model.graph.mapNode(_ => ())), "svg_inline")).withKey(Some(h.toString))
+              val renderGraph = model.graph.mapNode(__ => ())
+              Html.raw("div")(gv.dot(Digraph(renderGraph), "svg_inline")).withKey(Some(renderGraph.hashCode().toString))
             }
             .getOrElse(div(text("Waiting for graphviz wasm to load")))
         )
