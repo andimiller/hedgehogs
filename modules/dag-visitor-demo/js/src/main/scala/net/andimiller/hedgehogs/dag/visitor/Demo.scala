@@ -160,7 +160,6 @@ object Demo extends TyrianIOApp[Msg, Model]:
       val ts           = Duration.between(model.startTime, now).getSeconds()
       val nextGraph    = model.graph.addNode(id, model.graph.nodeMap(id)._1 -> s)
       val stateUpdates = Cmd.Batch(nextGraph.nodeMap.view.mapValues(_._2).toList.map { case (id, state) =>
-        println(s"setting $id to $state")
         CssVariables.set[IO, Msg](s"--$id-fill", state.toColour)
       })
       (
