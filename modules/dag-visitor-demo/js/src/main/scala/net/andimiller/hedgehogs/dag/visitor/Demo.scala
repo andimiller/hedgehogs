@@ -126,7 +126,8 @@ object Demo extends TyrianIOApp[Msg, Model]:
                 State.Waiting.toHtml
               )
             )
-          )
+          ),
+          Cmd.Emit(Msg.SyncNodeColours)
         )
       )
     case Msg.LoadGraphviz           =>
@@ -155,13 +156,20 @@ object Demo extends TyrianIOApp[Msg, Model]:
       )
     case Msg.QueueCreated(q)        =>
       (model.copy(queue = Some(q)), Cmd.None)
+    case Msg.SyncNodeColours        =>
+      (
+        model,
+        Cmd.Batch(
+          model.graph.mapNode(_._2).nodeMap.toList.map { case (id, state) =>
+            CssVariables.set[IO, Msg](s"--$id-fill", state.toColour)
+          }
+        )
+      )
     case Msg.UpdateNodeState(id, s) =>
-      val now          = Instant.now()
-      val ts           = Duration.between(model.startTime, now).getSeconds()
-      val nextGraph    = model.graph.addNode(id, model.graph.nodeMap(id)._1 -> s)
-      val stateUpdates = Cmd.Batch(nextGraph.nodeMap.view.mapValues(_._2).toList.map { case (id, state) =>
-        CssVariables.set[IO, Msg](s"--$id-fill", state.toColour)
-      })
+      val now         = Instant.now()
+      val ts          = Duration.between(model.startTime, now).getSeconds()
+      val nextGraph   = model.graph.addNode(id, model.graph.nodeMap(id)._1 -> s)
+      val stateUpdate = CssVariables.set[IO, Msg](s"--$id-fill", s.toColour)
       (
         model.copy(
           graph = nextGraph
@@ -172,7 +180,7 @@ object Demo extends TyrianIOApp[Msg, Model]:
             Option.when(nextGraph.nodeMap.values.map(_._2).forall(_ == State.Done))(
               Msg.Log(Html.span(text("Graph has is all "), State.Done.toHtml))
             )
-          ).flatten.map(Cmd.Emit.apply).appended(stateUpdates)
+          ).flatten.map(Cmd.Emit.apply).appended(stateUpdate)
         )
       )
     case Msg.Log(msg)               =>
@@ -290,6 +298,7 @@ enum Msg:
   // respond to user
   case Log(msg: Html[Msg])
   case UpdateNodeState(node: String, state: State)
+  case SyncNodeColours
   case ClearLog
   //
   case NoOp
