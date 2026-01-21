@@ -101,8 +101,9 @@ class DagVisitorSpec extends CatsEffectSuite {
                      .flatMap { control =>
                        control.tickFor(10.seconds) *> control.results
                      }
-                     .map { case Some(Errored(e)) =>
-                       e.toString
+                     .map {
+                       case Some(Errored(e)) => e.toString
+                       case other            => fail(s"Expected Some(Errored(_)) but got $other")
                      }
                      .assertEquals("java.util.concurrent.TimeoutException: 10 seconds")
       _         <- started.get.assertEquals(Set("A", "B", "C", "E", "F"))
@@ -150,8 +151,9 @@ class DagVisitorSpec extends CatsEffectSuite {
                      .flatMap { control =>
                        control.tickFor(10.seconds) *> control.results
                      }
-                     .map { case Some(Errored(e)) =>
-                       e.toString
+                     .map {
+                       case Some(Errored(e)) => e.toString
+                       case other            => fail(s"Expected Some(Errored(_)) but got $other")
                      }
                      .assertEquals(
                        "net.andimiller.hedgehogs.dag.visitor.DagVisitor$SubtaskFailed: Node G failed to run: G went boom"
