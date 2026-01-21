@@ -1,4 +1,3 @@
-import xerial.sbt.Sonatype._
 import sbtwelcome._
 
 val runtimes       = List(JVMPlatform, JSPlatform)
@@ -32,11 +31,18 @@ val commonSettings = List(
   scalaVersion               := "3.3.7",
   ThisBuild / scalafmtConfig := file(".scalafmt.conf"),
   useGpg                     := true,
-  publishTo                  := sonatypePublishTo.value,
+  pomIncludeRepository       := { _ => false },
+  publishMavenStyle          := true,
+  publishTo                  := {
+    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+    else localStaging.value
+  },
   licenses                   := Seq("MIT" -> url("https://opensource.org/licenses/MIT")),
-  sonatypeProjectHosting     := Some(
-    GitHubHosting("andimiller", "hedgehogs", "andi at andimiller dot net")
+  scmInfo                    := Some(
+    ScmInfo(url("https://github.com/andimiller/hedgehogs"), "scm:git@github.com:andimiller/hedgehogs.git")
   ),
+  homepage                   := Some(url("https://github.com/andimiller/hedgehogs")),
   developers                 := List(
     Developer(
       id = "andimiller",
