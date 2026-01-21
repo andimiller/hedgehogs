@@ -93,26 +93,26 @@ object DagVisitor {
                                               }
                                               .toMap
                                           }
-                                        val task =
-                                          visitor
-                                            .run(id, graph.nodeMap(id).left.toOption.get, graph, inputs)
-                                            .flatMap { result =>
-                                              combinedGraph
-                                                .update {
-                                                  _.addNode(id, Right(result))
-                                                }
-                                                .flatTap { _ =>
-                                                  completed.offer(id) // tell the queue we're done
-                                                }
-                                            }
-                                            .onError { case e =>
-                                              // if something goes wrong, set the error and then send the complete
-                                              errored.complete(SubtaskFailed(id.toString, e)) *> completed.offer(id)
-                                            }
-                                        startedSet.update(_ + id) *>
-                                          task.start.flatMap { fibre =>
-                                            backgroundTasks.update(_.updated(id, fibre))
-                                          }.void // we could track these fibres for clean shutdowns, TODO
+                                          val task =
+                                            visitor
+                                              .run(id, graph.nodeMap(id).left.toOption.get, graph, inputs)
+                                              .flatMap { result =>
+                                                combinedGraph
+                                                  .update {
+                                                    _.addNode(id, Right(result))
+                                                  }
+                                                  .flatTap { _ =>
+                                                    completed.offer(id) // tell the queue we're done
+                                                  }
+                                              }
+                                              .onError { case e =>
+                                                // if something goes wrong, set the error and then send the complete
+                                                errored.complete(SubtaskFailed(id.toString, e)) *> completed.offer(id)
+                                              }
+                                          startedSet.update(_ + id) *>
+                                            task.start.flatMap { fibre =>
+                                              backgroundTasks.update(_.updated(id, fibre))
+                                            }.void // we could track these fibres for clean shutdowns, TODO
                                         }
                          } yield ()
                        }
