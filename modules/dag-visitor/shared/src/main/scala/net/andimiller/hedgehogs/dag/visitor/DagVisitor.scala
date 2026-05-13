@@ -127,7 +127,11 @@ object DagVisitor {
         }
         .use { _ =>
           (tick *> (completed.take >> tick)
-            .whileM_(combinedGraph.get.map(_.nodeMap.values.exists(_.isLeft))))
+            .whileM_(combinedGraph.get.map(_.nodeMap.values.exists(_.isLeft)))) *>
+            // Join each fiber once so transformer state (e.g. WriterT logs) is sequenced
+            // into the parent. Errors are already routed via `errored`, so swallow here.
+            backgroundTasks.get
+              .flatMap(_.values.toList.traverse_(_.joinWithUnit.handleError(_ => ())))
         }
     result          <- combinedGraph.get
   } yield result.mapNode { _.toOption.get } // everything should be right now

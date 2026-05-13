@@ -1,8 +1,10 @@
 package net.andimiller.hedgehogs.dag.visitor
 
+import cats.data.WriterT
 import cats.effect.kernel.Outcome.Errored
 import cats.effect.testkit.TestControl
 import cats.effect.{IO, Ref}
+import cats.syntax.all._
 import munit.CatsEffectSuite
 import net.andimiller.hedgehogs.DataGraph
 import net.andimiller.hedgehogs.dag.visitor.DagVisitor.RunMode.Dependency
@@ -164,5 +166,38 @@ class DagVisitorSpec extends CatsEffectSuite {
       _         <- cancelled.get.assertEquals(Set("C", "E", "F"))
     } yield ()
 
+  }
+
+  test("Propagate WriterT log from each visited node back into the parent") {
+
+    // Each node emits its id into the WriterT log. The aggregated log on the parent should
+    // contain every node's id — i.e. runConcurrent must `join` each forked fiber's outcome so
+    // its log is sequenced back into the surrounding WriterT.
+    type H[A] = WriterT[IO, List[String], A]
+
+    case object Takes
+
+    val graph = DataGraph
+      .empty[String, Unit, Takes.type]
+      .addNode("A", ())
+      .addNode("B", ())
+      .addNode("C", ())
+      .addNode("D", ())
+      .addNode("E", ())
+      .addEdge("A", "D", Takes)
+      .addEdge("B", "D", Takes)
+      .addEdge("C", "E", Takes)
+      .addEdge("D", "E", Takes)
+
+    val runner = new SimpleDagVisitor[H, String, Unit, Unit, Takes.type] {
+      override def run(id: String, node: Unit, inputs: Map[String, Unit]): H[Unit] =
+        WriterT.tell[IO, List[String]](List(id))
+    }
+
+    DagVisitor
+      .runConcurrent(runner)(graph)
+      .run
+      .map(_._1.sorted)
+      .assertEquals(List("A", "B", "C", "D", "E"))
   }
 }
