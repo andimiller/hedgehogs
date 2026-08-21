@@ -25,6 +25,9 @@ trait SimpleGraph[Id] {
 
 case class AdjacencyListSimpleGraph[Id](nodes: Set[Id], edges: Set[(Id, Id)]) extends SimpleGraph[Id] {
 
+  private lazy val outgoingIndex: Map[Id, Set[Id]] = edges.groupBy(_._1).view.mapValues(_.map(_._2)).toMap
+  private lazy val inboundIndex: Map[Id, Set[Id]]  = edges.groupBy(_._2).view.mapValues(_.map(_._1)).toMap
+
   override def addNode(id: Id): AdjacencyListSimpleGraph[Id] =
     copy(
       nodes = nodes + id
@@ -46,11 +49,9 @@ case class AdjacencyListSimpleGraph[Id](nodes: Set[Id], edges: Set[(Id, Id)]) ex
     edges = edges - ((from, to))
   )
 
-  override def outgoing(id: Id): Set[Id]                =
-    edges.collect { case (from, to) if from == id => to }
+  override def outgoing(id: Id): Set[Id] = outgoingIndex.getOrElse(id, Set.empty)
 
-  override def inbound(id: Id): Set[Id]                 =
-    edges.collect { case (from, to) if to == id => from }
+  override def inbound(id: Id): Set[Id] = inboundIndex.getOrElse(id, Set.empty)
 
   override def map[Id2](f: Id => Id2): SimpleGraph[Id2] =
     new AdjacencyListSimpleGraph[Id2](
