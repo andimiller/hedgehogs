@@ -51,3 +51,32 @@ Scala Targets: JVM, JS
 * Can run different `RunMode`s, indicating the direction edges run
   * `Flow` will make `A->B` run `A` then `B`, this is the default
   * `Dependency` will make `A->B` run `B` then `A`
+
+## `SuspendableDagVisitor[F[_], Id, In, Out, Edge, Wait, Payload]`
+
+* Like `DagVisitor`, but a node may return `StepResult.Suspend(handle)` instead of an
+  output — for steps that kick off slow external work (a remote job, a human approval)
+  that shouldn't hold a process alive
+* `SuspendableDagVisitor.start` runs the DAG until it either finishes
+  (`RunResult.Finished`, with the output graph) or can't make any more progress
+  (`RunResult.Suspended`, with a `DagSnapshot` — a serializable picture of the run:
+  every node is `Pending`, `Waiting` on a handle, or `Done`)
+* Persist the snapshot wherever you like (a database, probably); when the external work
+  completes, rehydrate it and call `SuspendableDagVisitor.resume(visitor)(snapshot,
+  Map(nodeId -> payload))` — the visitor's `resume` method turns the payload into an
+  output (or suspends again), and the run carries on until `Finished` or the next
+  `Suspended`
+* Steps may be re-run if a segment is retried, so they should be idempotent or
+  tolerably re-runnable; single-writer-per-run is the application's responsibility
+* Optionally takes a `RunEvent => F[Unit]` callback for logging/metrics — emits
+  `NodeStarted`, `NodeSuspended`, `NodeResumed`, and `NodeCompleted` events
+
+# Dag Visitor Circe
+
+## `DagSnapshotCodecs`
+
+* circe `Encoder`/`Decoder` for `DagSnapshot`, given codecs for your id, node, wait
+  handle, and edge types — so a suspended run can be stored as JSON and rehydrated later
+* See `DagSnapshotCodecsSpec` for the full suspend → persist → rehydrate → resume flow,
+  or `examples/suspendable-http` for a runnable demo with an http server and disk-backed
+  JSON storage (`sbt exampleSuspendableHttp/run`)
