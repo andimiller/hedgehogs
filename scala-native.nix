@@ -17,7 +17,7 @@ in rec {
       libunwind
       clang
       zlib
-      s2n
+      s2n-tls
       nodejs
       mold
     ];
