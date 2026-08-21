@@ -73,7 +73,8 @@ lazy val root = (project in file("."))
   .settings(commonSettings)
   .settings(
     crossScalaVersions := Nil,
-    publish / skip     := true
+    publish / skip     := true,
+    sonaDeploymentName := s"hedgehogs-${version.value}"
   )
 
 lazy val core = crossProject(runtimes: _*)
