@@ -93,26 +93,26 @@ object DagVisitor {
                                               }
                                               .toMap
                                           }
-                                        val task =
-                                          visitor
-                                            .run(id, graph.nodeMap(id).left.toOption.get, graph, inputs)
-                                            .flatMap { result =>
-                                              combinedGraph
-                                                .update {
-                                                  _.addNode(id, Right(result))
-                                                }
-                                                .flatTap { _ =>
-                                                  completed.offer(id) // tell the queue we're done
-                                                }
-                                            }
-                                            .onError { case e =>
-                                              // if something goes wrong, set the error and then send the complete
-                                              errored.complete(SubtaskFailed(id.toString, e)) *> completed.offer(id)
-                                            }
-                                        startedSet.update(_ + id) *>
-                                          task.start.flatMap { fibre =>
-                                            backgroundTasks.update(_.updated(id, fibre))
-                                          }.void // we could track these fibres for clean shutdowns, TODO
+                                          val task =
+                                            visitor
+                                              .run(id, graph.nodeMap(id).left.toOption.get, graph, inputs)
+                                              .flatMap { result =>
+                                                combinedGraph
+                                                  .update {
+                                                    _.addNode(id, Right(result))
+                                                  }
+                                                  .flatTap { _ =>
+                                                    completed.offer(id) // tell the queue we're done
+                                                  }
+                                              }
+                                              .onError { case e =>
+                                                // if something goes wrong, set the error and then send the complete
+                                                errored.complete(SubtaskFailed(id.toString, e)) *> completed.offer(id)
+                                              }
+                                          startedSet.update(_ + id) *>
+                                            task.start.flatMap { fibre =>
+                                              backgroundTasks.update(_.updated(id, fibre))
+                                            }.void // we could track these fibres for clean shutdowns, TODO
                                         }
                          } yield ()
                        }
@@ -127,7 +127,11 @@ object DagVisitor {
         }
         .use { _ =>
           (tick *> (completed.take >> tick)
-            .whileM_(combinedGraph.get.map(_.nodeMap.values.exists(_.isLeft))))
+            .whileM_(combinedGraph.get.map(_.nodeMap.values.exists(_.isLeft)))) *>
+            // Join each fiber once so transformer state (e.g. WriterT logs) is sequenced
+            // into the parent. Errors are already routed via `errored`, so swallow here.
+            backgroundTasks.get
+              .flatMap(_.values.toList.traverse_(_.joinWithUnit.handleError(_ => ())))
         }
     result          <- combinedGraph.get
   } yield result.mapNode { _.toOption.get } // everything should be right now

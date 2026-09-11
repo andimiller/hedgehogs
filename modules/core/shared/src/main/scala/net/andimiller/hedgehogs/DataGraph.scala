@@ -70,7 +70,13 @@ case class AdjacencyListDataGraph[Id, NodeData, EdgeData](
     )
   )
 
-  override def nodes: Set[Id] = nodeMap.keySet
+  private lazy val outboundEdgeIndex: Map[Id, Map[Id, EdgeData]] =
+    edgeMap.groupBy { case ((from, _), _) => from }.view.mapValues(_.map { case ((_, to), data) => to -> data }).toMap
+  private lazy val outboundIndex: Map[Id, Set[Id]]               = outboundEdgeIndex.view.mapValues(_.keySet).toMap
+  private lazy val inboundIndex: Map[Id, Set[Id]]                =
+    edgeMap.groupBy { case ((_, to), _) => to }.view.mapValues(_.keySet.map(_._1)).toMap
+
+  override def nodes: Set[Id]                                    = nodeMap.keySet
 
   override def edges: Set[(Id, Id)] = edgeMap.keySet
 
@@ -107,14 +113,14 @@ case class AdjacencyListDataGraph[Id, NodeData, EdgeData](
       edgeMap = edgeMap.removed((from, to))
     )
 
-  override def outgoing(id: Id): Set[Id]                                  =
-    edges.collect { case (from, to) if from == id => to }
+  override def outgoing(id: Id): Set[Id] =
+    outboundIndex.getOrElse(id, Set.empty)
 
-  override def outgoingEdges(id: Id): Map[Id, EdgeData]                   =
-    edgeMap.collect { case ((from, to), data) if from == id => to -> data }
+  override def outgoingEdges(id: Id): Map[Id, EdgeData] =
+    outboundEdgeIndex.getOrElse(id, Map.empty)
 
-  override def inbound(id: Id): Set[Id]                                   =
-    edges.collect { case (from, to) if to == id => from }
+  override def inbound(id: Id): Set[Id] =
+    inboundIndex.getOrElse(id, Set.empty)
 
   override def map[Id2](f: Id => Id2): DataGraph[Id2, NodeData, EdgeData] =
     new AdjacencyListDataGraph[Id2, NodeData, EdgeData](
