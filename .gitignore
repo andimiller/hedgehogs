@@ -4,3 +4,6 @@ project/project
 .idea
 .metals
 .bloop
+node_modules
+.parcel-cache
+dist/*

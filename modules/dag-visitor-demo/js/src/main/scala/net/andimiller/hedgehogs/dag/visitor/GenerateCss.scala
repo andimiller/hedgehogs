@@ -13,7 +13,7 @@ ${nodeNames.map(n => s"  --$n-fill: white;").mkString("\n")}
   val css =
     nodeNames
       .map { n =>
-        s"g.node#$n ellipse { fill: var(--$n-fill); }"
+        s"g.node#$n ellipse, g.node#$n polygon { fill: var(--$n-fill); }"
       }
       .mkString("\n")
 

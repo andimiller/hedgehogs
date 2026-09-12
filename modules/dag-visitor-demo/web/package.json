@@ -1,10 +1,14 @@
 {
   "scripts": {
     "start": "parcel index.html --no-cache --dist-dir dist --log-level info",
-    "build": "parcel build index.html --dist-dir dist --log-level info"
+    "build": "parcel build index.html --public-url ./ --dist-dir dist --log-level info",
+    "postinstall": "touch node_modules/@hpcc-js/wasm-graphviz/dist/graphvizlib.wasm"
   },
   "dependencies": {
     "@hpcc-js/wasm-graphviz": "1.8.0"
+  },
+  "alias": {
+    "@hpcc-js/wasm-graphviz": "./node_modules/@hpcc-js/wasm-graphviz"
   },
   "devDependencies": {
     "parcel": "^2.1.0",

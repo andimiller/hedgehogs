@@ -109,13 +109,14 @@ lazy val `dag-visitor` = crossProject(runtimes: _*)
 
 lazy val `dag-visitor-demo` = crossProject(JSPlatform)
   .in(file("modules/dag-visitor-demo"))
-  .dependsOn(`dag-visitor`)
+  .dependsOn(`dag-visitor`, `dag-visitor-circe`)
   .settings(commonSettings: _*)
   .settings(
     name               := "hedgehogs-dag-visitor-demo",
     libraryDependencies ++= List(
       "io.indigoengine"   %%% "tyrian-io"       % "0.14.0",
-      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
+      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
+      "io.circe"          %%% "circe-parser"    % "0.14.16"
     ),
     scalaVersion       := "3.6.3",
     crossScalaVersions := List("3.6.3"),

@@ -1,4 +1,13 @@
-g.node ellipse {
+/* override dark.css's centered 800px column: use the full viewport with some outer padding */
+body {
+  max-width: none;
+  margin: 0;
+  padding: 20px 32px;
+  box-sizing: border-box;
+}
+
+g.node ellipse,
+g.node polygon {
   transition: fill 0.2s ease;
 }
 
@@ -57,55 +66,55 @@ g.node ellipse {
   --z-fill: white;
 }
 
-g.node#A ellipse { fill: var(--A-fill); }
-g.node#B ellipse { fill: var(--B-fill); }
-g.node#C ellipse { fill: var(--C-fill); }
-g.node#D ellipse { fill: var(--D-fill); }
-g.node#E ellipse { fill: var(--E-fill); }
-g.node#F ellipse { fill: var(--F-fill); }
-g.node#G ellipse { fill: var(--G-fill); }
-g.node#H ellipse { fill: var(--H-fill); }
-g.node#I ellipse { fill: var(--I-fill); }
-g.node#J ellipse { fill: var(--J-fill); }
-g.node#K ellipse { fill: var(--K-fill); }
-g.node#L ellipse { fill: var(--L-fill); }
-g.node#M ellipse { fill: var(--M-fill); }
-g.node#N ellipse { fill: var(--N-fill); }
-g.node#O ellipse { fill: var(--O-fill); }
-g.node#P ellipse { fill: var(--P-fill); }
-g.node#Q ellipse { fill: var(--Q-fill); }
-g.node#R ellipse { fill: var(--R-fill); }
-g.node#S ellipse { fill: var(--S-fill); }
-g.node#T ellipse { fill: var(--T-fill); }
-g.node#U ellipse { fill: var(--U-fill); }
-g.node#V ellipse { fill: var(--V-fill); }
-g.node#W ellipse { fill: var(--W-fill); }
-g.node#X ellipse { fill: var(--X-fill); }
-g.node#Y ellipse { fill: var(--Y-fill); }
-g.node#Z ellipse { fill: var(--Z-fill); }
-g.node#a ellipse { fill: var(--a-fill); }
-g.node#b ellipse { fill: var(--b-fill); }
-g.node#c ellipse { fill: var(--c-fill); }
-g.node#d ellipse { fill: var(--d-fill); }
-g.node#e ellipse { fill: var(--e-fill); }
-g.node#f ellipse { fill: var(--f-fill); }
-g.node#g ellipse { fill: var(--g-fill); }
-g.node#h ellipse { fill: var(--h-fill); }
-g.node#i ellipse { fill: var(--i-fill); }
-g.node#j ellipse { fill: var(--j-fill); }
-g.node#k ellipse { fill: var(--k-fill); }
-g.node#l ellipse { fill: var(--l-fill); }
-g.node#m ellipse { fill: var(--m-fill); }
-g.node#n ellipse { fill: var(--n-fill); }
-g.node#o ellipse { fill: var(--o-fill); }
-g.node#p ellipse { fill: var(--p-fill); }
-g.node#q ellipse { fill: var(--q-fill); }
-g.node#r ellipse { fill: var(--r-fill); }
-g.node#s ellipse { fill: var(--s-fill); }
-g.node#t ellipse { fill: var(--t-fill); }
-g.node#u ellipse { fill: var(--u-fill); }
-g.node#v ellipse { fill: var(--v-fill); }
-g.node#w ellipse { fill: var(--w-fill); }
-g.node#x ellipse { fill: var(--x-fill); }
-g.node#y ellipse { fill: var(--y-fill); }
-g.node#z ellipse { fill: var(--z-fill); }
+g.node#A ellipse, g.node#A polygon { fill: var(--A-fill); }
+g.node#B ellipse, g.node#B polygon { fill: var(--B-fill); }
+g.node#C ellipse, g.node#C polygon { fill: var(--C-fill); }
+g.node#D ellipse, g.node#D polygon { fill: var(--D-fill); }
+g.node#E ellipse, g.node#E polygon { fill: var(--E-fill); }
+g.node#F ellipse, g.node#F polygon { fill: var(--F-fill); }
+g.node#G ellipse, g.node#G polygon { fill: var(--G-fill); }
+g.node#H ellipse, g.node#H polygon { fill: var(--H-fill); }
+g.node#I ellipse, g.node#I polygon { fill: var(--I-fill); }
+g.node#J ellipse, g.node#J polygon { fill: var(--J-fill); }
+g.node#K ellipse, g.node#K polygon { fill: var(--K-fill); }
+g.node#L ellipse, g.node#L polygon { fill: var(--L-fill); }
+g.node#M ellipse, g.node#M polygon { fill: var(--M-fill); }
+g.node#N ellipse, g.node#N polygon { fill: var(--N-fill); }
+g.node#O ellipse, g.node#O polygon { fill: var(--O-fill); }
+g.node#P ellipse, g.node#P polygon { fill: var(--P-fill); }
+g.node#Q ellipse, g.node#Q polygon { fill: var(--Q-fill); }
+g.node#R ellipse, g.node#R polygon { fill: var(--R-fill); }
+g.node#S ellipse, g.node#S polygon { fill: var(--S-fill); }
+g.node#T ellipse, g.node#T polygon { fill: var(--T-fill); }
+g.node#U ellipse, g.node#U polygon { fill: var(--U-fill); }
+g.node#V ellipse, g.node#V polygon { fill: var(--V-fill); }
+g.node#W ellipse, g.node#W polygon { fill: var(--W-fill); }
+g.node#X ellipse, g.node#X polygon { fill: var(--X-fill); }
+g.node#Y ellipse, g.node#Y polygon { fill: var(--Y-fill); }
+g.node#Z ellipse, g.node#Z polygon { fill: var(--Z-fill); }
+g.node#a ellipse, g.node#a polygon { fill: var(--a-fill); }
+g.node#b ellipse, g.node#b polygon { fill: var(--b-fill); }
+g.node#c ellipse, g.node#c polygon { fill: var(--c-fill); }
+g.node#d ellipse, g.node#d polygon { fill: var(--d-fill); }
+g.node#e ellipse, g.node#e polygon { fill: var(--e-fill); }
+g.node#f ellipse, g.node#f polygon { fill: var(--f-fill); }
+g.node#g ellipse, g.node#g polygon { fill: var(--g-fill); }
+g.node#h ellipse, g.node#h polygon { fill: var(--h-fill); }
+g.node#i ellipse, g.node#i polygon { fill: var(--i-fill); }
+g.node#j ellipse, g.node#j polygon { fill: var(--j-fill); }
+g.node#k ellipse, g.node#k polygon { fill: var(--k-fill); }
+g.node#l ellipse, g.node#l polygon { fill: var(--l-fill); }
+g.node#m ellipse, g.node#m polygon { fill: var(--m-fill); }
+g.node#n ellipse, g.node#n polygon { fill: var(--n-fill); }
+g.node#o ellipse, g.node#o polygon { fill: var(--o-fill); }
+g.node#p ellipse, g.node#p polygon { fill: var(--p-fill); }
+g.node#q ellipse, g.node#q polygon { fill: var(--q-fill); }
+g.node#r ellipse, g.node#r polygon { fill: var(--r-fill); }
+g.node#s ellipse, g.node#s polygon { fill: var(--s-fill); }
+g.node#t ellipse, g.node#t polygon { fill: var(--t-fill); }
+g.node#u ellipse, g.node#u polygon { fill: var(--u-fill); }
+g.node#v ellipse, g.node#v polygon { fill: var(--v-fill); }
+g.node#w ellipse, g.node#w polygon { fill: var(--w-fill); }
+g.node#x ellipse, g.node#x polygon { fill: var(--x-fill); }
+g.node#y ellipse, g.node#y polygon { fill: var(--y-fill); }
+g.node#z ellipse, g.node#z polygon { fill: var(--z-fill); }
